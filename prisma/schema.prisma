@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       Int        @id @default(autoincrement())
+  name     String
+  email    String     @unique
+  password String
+  State    State[]
+  Category Category[]
+  Task     Task[]
+}
+
+model State {
+  id     Int     @id @default(autoincrement())
+  idUser Int
+  name   String
+  active Boolean @default(true)
+  users  User    @relation(fields: [idUser], references: [id])
+  Tasks  Task[]
+}
+
+model Category {
+  id     Int     @id @default(autoincrement())
+  idUser Int
+  name   String
+  active Boolean @default(true)
+  user   User    @relation(fields: [idUser], references: [id])
+  Task   Task[]
+}
+
+model Task {
+  id         Int      @id @default(autoincrement())
+  idUser     Int
+  idState    Int
+  idCategory Int
+  title      String
+  date       DateTime @db.Date
+  note       String
+  user       User     @relation(fields: [idUser], references: [id])
+  state      State    @relation(fields: [idState], references: [id])
+  category   Category @relation(fields: [idCategory], references: [id])
+}
