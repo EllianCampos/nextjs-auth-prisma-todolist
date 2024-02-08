@@ -57,12 +57,16 @@ export async function POST(req) {
     idCategory = reqdata.idCategory
 
 		if (!title || title === '') {
-			return NextResponse.json({ message: "Bad Request send a title" }, { status: 400 })
+			return NextResponse.json({ message: "El título es requerido" }, { status: 400 })
 		} else if (!date || date === '') {
-      return NextResponse.json({ message: "Bad Request send a date" }, { status: 400 })
+      return NextResponse.json({ message: "La fecha es requerida" }, { status: 400 })
+    } else if (!idState || idState === '') {
+      return NextResponse.json({ message: "El estado es requerido" }, { status: 400 })
+    }else if (!idCategory || idCategory === '') {
+      return NextResponse.json({ message: "La categoría es requerida" }, { status: 400 })
     }
 	} catch (error) {
-		return NextResponse.json({ message: "Bad Request send a title and date" }, { status: 400 })
+		return NextResponse.json({ message: "Por favor ingrese los campos obligatorios" }, { status: 400 })
 	}
 
 	try {

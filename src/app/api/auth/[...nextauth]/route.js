@@ -18,10 +18,10 @@ const handler = NextAuth({
             },
             async authorize(credentials, req) {
                 const resultVerify = await prisma.user.findUnique({ where: { email: credentials.email } })
-                if (!resultVerify) throw new Error('Invalid credentials1')
+                if (!resultVerify) throw new Error('Invalid credentials')
                 
                 const passwordMatch = await bcrypt.compare(credentials.password, resultVerify.password)
-                if (!passwordMatch) throw new Error('Invalid credentials2')
+                if (!passwordMatch) throw new Error('Invalid credentials')
 
                 return {
                     idUser: resultVerify.id,

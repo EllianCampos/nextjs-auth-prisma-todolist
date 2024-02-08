@@ -7,18 +7,13 @@ import { useEffect, useState } from "react";
 export default function TaskPage({ params }) {
   const router = useRouter()
 
-  const [mode, setMode] = useState("create" | "edit");
-  const [onError, setOnError] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
-
+  const [error, setOnError] = useState(null);
+  
   const [title, setTitle] = useState("");
   const [date, setDate] = useState("");
   const [state, setState] = useState("");
   const [category, setCategory] = useState("");
   const [note, setNote] = useState("");
-
-  // const [idState, setIdState] = useState("");
-  // const [idCategory, setIdCategory] = useState("");
 
   const [states, setStates] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -66,10 +61,15 @@ export default function TaskPage({ params }) {
     .then(res => {
       if (res.ok){
         router.push('/')
+        return null
       } else {
-
+        return res.json()
       }
-      console.log(res)
+    })
+    .then(res => {
+      if (res){
+        setOnError(res.message)
+      }
     })
   }
 
@@ -80,7 +80,6 @@ export default function TaskPage({ params }) {
         router.push('/')
       }
     })
-
   }
 
   useEffect(() => {
@@ -95,6 +94,11 @@ export default function TaskPage({ params }) {
     <section className="container mt-4 mb-5">
       <h1 className="text-center">{params.id ? "Editar tarea" : "Crear tarea"}</h1>
       <form onSubmit={handleSubmit}>
+        {
+          error !== null && <div className="alert alert-danger mt-4">
+              {error}
+          </div>
+        }
         {/* Title */}
         <div className="mt-3">
           <label
@@ -109,7 +113,7 @@ export default function TaskPage({ params }) {
             value={title}
             onChange={event => setTitle(event.target.value)}
             className="form-control"
-            required
+            // required
           />
         </div>
         {/* Date */}
@@ -126,7 +130,7 @@ export default function TaskPage({ params }) {
             value={date}
             onChange={event => setDate(event.target.value)}
             className="form-control"
-            required
+            // required
           />
         </div>
         {/* States */}
@@ -140,12 +144,8 @@ export default function TaskPage({ params }) {
           <select
             className="form-select"
             id="state"
-            onChange={event => {
-              console.log(event.target.value) 
-              setState(event.target.value)
-              }}
             value={state}
-            required
+            onChange={event => {setState(event.target.value)}}
           >
             <option>Selecciona un estado</option>
             {states.map((item) => (
@@ -168,7 +168,6 @@ export default function TaskPage({ params }) {
             id="category"
             value={category}
             onChange={event => setCategory(event.target.value)}
-            required
           >
             <option>Selecciona una categoría</option>
             {categories.map((item) => (
