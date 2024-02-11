@@ -9,24 +9,23 @@ export default function CrudSettings({ title, route }) {
   const [name, setName] = useState("");
 
   const [editMode, setEditMode] = useState(false);
-  const [onError, setOnError] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
+  const [error, setError] = useState(null);
 
   const get = () => {
     fetch(`/api/${route}`)
-    .then(res => res.json())
-    .then(res => {
-      const newData = []
+      .then(res => res.json())
+      .then(res => {
+        const newData = []
 
-      for (const item of res) {
-        newData.push({
-          id: Object.values(item)[0],
-          name: item.name
-        })
-      }
+        for (const item of res) {
+          newData.push({
+            id: Object.values(item)[0],
+            name: item.name
+          })
+        }
 
-      setData(newData)
-    })
+        setData(newData)
+      })
   };
 
   useEffect(() => {
@@ -35,11 +34,9 @@ export default function CrudSettings({ title, route }) {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    
 
     if (name.trim() == "") {
-      setOnError(true);
-      setErrorMessage("Ingresa el nombre");
+      setError("Ingresa el nombre");
       return;
     }
 
@@ -50,45 +47,40 @@ export default function CrudSettings({ title, route }) {
       },
       body: JSON.stringify({ name }),
     })
-    .then(res => {
-      if (res.status === 201 || res.status === 200) {
-        return res.json()
-      } else {
-        return null
-      }
-    })
-    .then(res => {
-      const resObj = Object.values(res)[1]
-      const resId = Object.values(resObj)[0]
-      const resName = Object.values(resObj)[1]
+      .then(res => res.json())
+      .then(res => {
+        if (res.errorMessage) {
+          setError(res.errorMessage)
+        } else {
+          const resObj = Object.values(res)[1]
+          const resId = Object.values(resObj)[0]
+          const resName = Object.values(resObj)[1]
 
-      if (editMode) {
-        const temp = [...data];
-        const item = temp.find((item) => item.id === id);
-        item.name = resName;
-        setData(temp);
-      } else {
-        setData([...data, { id: resId, name: resName }]);
-      }
+          if (editMode) {
+            const temp = [...data];
+            const item = temp.find((item) => item.id === id);
+            item.name = resName;
+            setData(temp);
+          } else {
+            setData([...data, { id: resId, name: resName }]);
+          }
 
-      setName("");
-      setEditMode(false);
-      setOnError(false);
-      setErrorMessage("");
-    })
-
-    setName("");
-    setEditMode(false);
-    setOnError(false);
-    setErrorMessage("");
+          setError(false);
+          setName("");
+          setEditMode(false);
+        }
+      })
   };
 
   const handleDelete = (event) => {
     event.preventDefault()
 
     fetch(`/api/${route}/${id}`, { method: 'DELETE' })
+      .then(res => res.json())
       .then(res => {
-        if (res.status === 200) {
+        if (res.errorMessage) {
+          setError(res.errorMessage)
+        } else {
           setData(prevData => {
             const temp = prevData.filter(item => item.id !== id)
             setName('')
@@ -99,11 +91,18 @@ export default function CrudSettings({ title, route }) {
       })
   };
 
+  const handleDiscardChanges = () => {
+    setId("")
+    setName("")
+    setEditMode(false)
+    setError(null)
+  }
+
   return (
     <div className="col-12 col-sm-6 mt-4">
       <h2>{title}</h2>
       <form onSubmit={handleSubmit} >
-        {onError && <div className="alert alert-danger ">{errorMessage}</div>}
+        {error && <div className="alert alert-danger ">{error}</div>}
         <label className="form-label">Nombre</label>
         <input
           type="text"
@@ -111,15 +110,28 @@ export default function CrudSettings({ title, route }) {
           onChange={(event) => setName(event.target.value)}
           className="form-control"
         />
-        <button
-          className={`btn ${editMode ? 'btn-warning' : 'btn-success'}  mt-2`}
-          type="submit"
-        >
-          Guardar
-        </button>
-        {editMode && <button onClick={handleDelete} className="btn btn-danger mt-2 ms-2">
-          Eliminar
-        </button>}
+        <div className="d-flex justify-content-between">
+          <button
+            className={`btn ${editMode ? 'btn-warning' : 'btn-success'}  mt-2`}
+            type="submit"
+          >
+            Guardar
+          </button>
+          {editMode && <>
+            <button
+              className="btn btn-secondary mt-2"
+              onClick={handleDiscardChanges}
+            >
+              Descartar
+            </button>
+            <button
+              onClick={handleDelete}
+              className="btn btn-danger mt-2"
+            >
+              Eliminar
+            </button>
+          </>}
+        </div>
       </form>
       <table className="table table-dark mt-3">
         <thead>
@@ -141,8 +153,7 @@ export default function CrudSettings({ title, route }) {
                       setId(item.id);
                       setName(item.name);
                       setEditMode(true);
-                      setOnError(false);
-                      setErrorMessage("");
+                      setError(null);
                     }}
                     className='btn btn-primary'
                   >

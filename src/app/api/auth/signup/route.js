@@ -3,9 +3,8 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/libs/prisma";
 
 export async function POST(request) {
+    // Validate request data
     let name, email, password
-
-    // Get data
     try {
         const requestjson = await request.json()
         name = requestjson.name
@@ -13,78 +12,81 @@ export async function POST(request) {
         password = requestjson.password
 
         if (!name || name === '') {
-            return NextResponse.json({ message: 'Por favor envie un nombre' }, { status: 400 })
+            return NextResponse.json({ errorMessage: 'Por favor envíe un nombre' }, { status: 400 })
         } else if (!email || email === '') {
-            return NextResponse.json({ message: 'Por favor envie un correo valido' }, { status: 400 })
+            return NextResponse.json({ errorMessage: 'Por favor envíe un correo valido' }, { status: 400 })
         } else if (!password || password === '') {
-            return NextResponse.json({ message: 'Por favor envie una contraseña valida' }, { status: 400 })
+            return NextResponse.json({ errorMessage: 'Por favor envíe una contraseña valida' }, { status: 400 })
         }
     } catch (error) {
-        console.error(error)
-        return NextResponse.json({ message: 'Por favor envie un nombre, un correo y una contraseña' })
+        return NextResponse.json({ errorMessage: 'Por favor envíe todos los datos obligatorios' })
     }
 
     try {
         // Verify if the user already exists
-        const user = await prisma.user.findUnique({
+        const user = await prisma.users.findUnique({
             where: {
                 email: email
             }
         })
         if (user) {
-            return NextResponse.json({ message: 'El correo no esta disponible' }, { status: 400 })
+            return NextResponse.json({ errorMessage: 'El correo no esta disponible' }, { status: 400 })
         }
 
         // Encrypt password
         const hashedPassword = await bcrypt.hash(password, 12)
 
         // Create the new user
-        const newUser = await prisma.user.create({
+        const newUser = await prisma.users.create({
             data: { name, email, password: hashedPassword }
         })
 
         // Create the states and categories by default
-        const states = await prisma.state.createMany({
+        const states = await prisma.states.createMany({
             data: [
                 {
-                    idUser: newUser.id,
+                    user_id: newUser.id,
                     name: "Pendiente"
                 },
                 {
-                    idUser: newUser.id,
+                    user_id: newUser.id,
                     name: "Comenzado"
                 },
                 {
-                    idUser: newUser.id,
+                    user_id: newUser.id,
                     name: "Avanzado"
                 },
                 {
-                    idUser: newUser.id,
+                    user_id: newUser.id,
                     name: "Finalizado"
                 }
             ]
         })
 
-        const categories = await prisma.category.createMany({
+        const categories = await prisma.categories.createMany({
             data: [
                 {
-                    idUser: newUser.id,
+                    user_id: newUser.id,
                     name: "Personal"
                 },
                 {
-                    idUser: newUser.id,
+                    user_id: newUser.id,
                     name: "Estudio"
                 },
                 {
-                    idUser: newUser.id,
+                    user_id: newUser.id,
                     name: "Trabajo"
                 }
             ]
         })
     
-        return NextResponse.json({ message: 'Registrado existosamente' }, { status: 201 })
+        return NextResponse.json({ 
+            message: 'Registrado existosamente' 
+        }, { status: 201 })
+        
     } catch (error) {
-        console.error(error);
-        return NextResponse.json({ message: 'Error interno del servidor' }, { status: 500 })
+        return NextResponse.json({
+			errorMessage: 'Error interno del servidor'
+		}, { status: 500 })
     }
 }

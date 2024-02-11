@@ -3,75 +3,89 @@ import { getToken } from "next-auth/jwt";
 import { NextResponse } from "next/server";
 
 export async function GET(req) {
-	// Get the user
+	// Validate if the request contains a token
 	const token = await getToken({ req })
-	if (!token) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
+	if (!token.user.id) return NextResponse.json({
+		errorMessage: 'Acceso NO autorizado'
+	}, { status: 401 });
 
 	try {
-		const states = await prisma.category.findMany({ 
+		// Search states by user_id
+		const categories = await prisma.categories.findMany({
 			where: {
-				idUser: token.user.idUser,
-				active: true
+				user_id: token.user.id,
 			}
-		 })
+		})
 
+		// Build the response
 		const response = []
-		for (const state of states) {
+		for (const category of categories) {
 			response.push({
-				idCategory: state.id,
-				name: state.name
+				idCategory: category.id,
+				name: category.name
 			})
 		}
 
 		return NextResponse.json(response)
+
 	} catch (error) {
-		return NextResponse.json({ message: "Bad Request send a name" }, { status: 400 })
+		console.log(error)
+		return NextResponse.json({
+			errorMessage: 'Error interno del servidor'
+		}, { status: 500 })
 	}
 }
 
-export async function POST(req) {
-	// Get the user
+export async function POST(req) { 
+	// Validate if the request contains a token
 	const token = await getToken({ req })
-	if (!token) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
+	if (!token.user.id) return NextResponse.json({
+		errorMessage: 'Acceso NO autorizado'
+	}, { status: 401 });
 
-	// Validate request
+	// Validate request data
 	let name
 	try {
-		// Get parameters
-		const reqdata = await req.json()
-		name = reqdata.name
+		const requestjson = await req.json()
+		name = requestjson.name
 
 		if (!name || name === '') {
-			return NextResponse.json({ message: "Bad Request send a name" }, { status: 400 })
+			return NextResponse.json({ errorMessage: "Por favor ingrese un nombre" }, { status: 400 })
 		}
 	} catch (error) {
-		return NextResponse.json({ message: "Bad Request send a name" }, { status: 400 })
+		return NextResponse.json({ errorMessage: "Por favor envíe todos los datos obligatorios" }, { status: 400 })
 	}
 
 	try {
-		// Create the new category
-		const newState = await prisma.category.create({
+		// Create 
+		const newCategory = await prisma.categories.create({
 			data: {
-				idUser: token.user.idUser,
+				user_id: token.user.id,
 				name: name,
 			}
 		})
 
-		// Validate if the stated was created
-		if (!newState) {
-			return NextResponse.json({ message: 'Error creando la categoría' }, { status: 500 })
+		// Validate if was created
+		if (!newCategory) {
+			return NextResponse.json({
+				errorMessage: 'Ha ocurrido un error creando la categoria'
+			}, { status: 500 })
 		}
 
+		// Build response
 		return NextResponse.json({
-			message: 'Categoría creada satisfactoriamenete',
-			state: {
-				idState: newState.id,
-				name: newState.name
+			message: 'Categoria creada satisfactoriamenete',
+			category: {
+				idCategory: newCategory.id,
+				name: newCategory.name
 			}
 		}, {
 			status: 201
 		})
+
 	} catch (error) {
-		return NextResponse.json({ message: 'Error interno del servidor' }, { status: 500 })
+		return NextResponse.json({
+			errorMessage: 'Error interno del servidor'
+		}, { status: 500 })
 	}
 }

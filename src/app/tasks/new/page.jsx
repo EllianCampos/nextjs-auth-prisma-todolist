@@ -7,12 +7,12 @@ import { useEffect, useState } from "react";
 export default function TaskPage({ params }) {
   const router = useRouter()
 
-  const [error, setOnError] = useState(null);
-  
+  const [error, setError] = useState(null);
+
   const [title, setTitle] = useState("");
   const [date, setDate] = useState("");
-  const [state, setState] = useState("");
-  const [category, setCategory] = useState("");
+  const [idState, setIdState] = useState("");
+  const [idCategory, setIdCategory] = useState("");
   const [note, setNote] = useState("");
 
   const [states, setStates] = useState([]);
@@ -20,66 +20,64 @@ export default function TaskPage({ params }) {
 
   const fetchTask = () => {
     fetch(`/api/tasks/${params.id}`)
-    .then(res => res.json())
-    .then(res => {
-      setTitle(res.title)
-      setDate(res.date.substring(0, 10))
-      setNote(res.note)
-      setState(res.state.idState)
-      setCategory(res.category.idCategory)
-    })
+      .then(res => res.json())
+      .then(res => {
+        setTitle(res.title)
+        setDate(res.date.substring(0, 10))
+        setNote(res.note)
+        setIdState(res.state.idState)
+        setIdCategory(res.category.idCategory)
+      })
   }
 
   const fetchStates = () => {
     fetch('/api/states')
-    .then(res => res.json())
-    .then(res => setStates(res))
+      .then(res => res.json())
+      .then(res => setStates(res))
   }
 
   const fetchCategories = () => {
     fetch('/api/categories')
-    .then(res => res.json())
-    .then(res => setCategories(res))
+      .then(res => res.json())
+      .then(res => setCategories(res))
   }
 
   const handleSubmit = (event) => {
     event.preventDefault()
 
-    fetch(`/api/tasks/${ params.id ? params.id : '' }`, {
+    fetch(`/api/tasks/${params.id ? params.id : ''}`, {
       method: params.id ? 'PUT' : 'POST',
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({
-        title, 
-        date, 
-        note,
-        idState: state,
-        idCategory: category
-      })
+      body: JSON.stringify({ title, date, note, idState, idCategory })
     })
-    .then(res => {
-      if (res.ok){
-        router.push('/')
-        return null
-      } else {
+      .then(res => {
+        if (res.status === 200 || res.status === 201) {
+         router.push('/')
+        } 
         return res.json()
-      }
-    })
-    .then(res => {
-      if (res){
-        setOnError(res.message)
-      }
-    })
+      })
+      .then(res => {
+        if (res.errorMessage) {
+          setError(res.errorMessage)
+        }
+      })
   }
 
   const handleDelete = () => {
     fetch(`/api/tasks/${params.id}`, { method: 'DELETE' })
-    .then(res => {
-      if (res.ok){
-        router.push('/')
-      }
-    })
+      .then(res => {
+        if (res.status === 200) {
+          router.push('/')
+         } 
+         return res.json()
+      })
+      .then(res => {
+        if (res.errorMesagge) {
+          setError(res.errorMesagge)
+        }
+      })
   }
 
   useEffect(() => {
@@ -96,7 +94,7 @@ export default function TaskPage({ params }) {
       <form onSubmit={handleSubmit}>
         {
           error !== null && <div className="alert alert-danger mt-4">
-              {error}
+            {error}
           </div>
         }
         {/* Title */}
@@ -113,7 +111,7 @@ export default function TaskPage({ params }) {
             value={title}
             onChange={event => setTitle(event.target.value)}
             className="form-control"
-            // required
+          // required
           />
         </div>
         {/* Date */}
@@ -130,7 +128,7 @@ export default function TaskPage({ params }) {
             value={date}
             onChange={event => setDate(event.target.value)}
             className="form-control"
-            // required
+          // required
           />
         </div>
         {/* States */}
@@ -144,8 +142,8 @@ export default function TaskPage({ params }) {
           <select
             className="form-select"
             id="state"
-            value={state}
-            onChange={event => {setState(event.target.value)}}
+            value={idState}
+            onChange={event => { setIdState(event.target.value) }}
           >
             <option>Selecciona un estado</option>
             {states.map((item) => (
@@ -166,8 +164,8 @@ export default function TaskPage({ params }) {
           <select
             className="form-select"
             id="category"
-            value={category}
-            onChange={event => setCategory(event.target.value)}
+            value={idCategory}
+            onChange={event => setIdCategory(event.target.value)}
           >
             <option>Selecciona una categoría</option>
             {categories.map((item) => (

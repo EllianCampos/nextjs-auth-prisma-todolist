@@ -2,57 +2,54 @@ generator client {
   provider = "prisma-client-js"
 }
 
-
 // MySQL
-// datasource db {
-//   provider = "mysql"
-//   url      = env("DATABASE_URL")
-// }
-
-// Postgress
 datasource db {
-  provider = "postgresql"
-  url = env("POSTGRES_PRISMA_URL") // uses connection pooling
-  directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
+  provider = "mysql"
+  url      = env("DATABASE_URL")
 }
 
-model User {
+// Postgress
+// datasource db {
+//   provider = "postgresql"
+//   url = env("POSTGRES_PRISMA_URL") // uses connection pooling
+//   directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
+// }
+
+model Users {
   id       Int        @id @default(autoincrement())
   name     String
   email    String     @unique
   password String
-  State    State[]
-  Category Category[]
-  Task     Task[]
+  state    States[]
+  category Categories[]
+  task     Tasks[]
 }
 
-model State {
-  id     Int     @id @default(autoincrement())
-  idUser Int
-  name   String
-  active Boolean @default(true)
-  users  User    @relation(fields: [idUser], references: [id])
-  Tasks  Task[]
+model States {
+  id      Int     @id @default(autoincrement())
+  user_id Int
+  name    String
+  user    Users   @relation(fields: [user_id], references: [id])
+  task    Tasks[]
 }
 
-model Category {
-  id     Int     @id @default(autoincrement())
-  idUser Int
-  name   String
-  active Boolean @default(true)
-  user   User    @relation(fields: [idUser], references: [id])
-  Task   Task[]
+model Categories {
+  id      Int     @id @default(autoincrement())
+  user_id Int
+  name    String
+  user    Users   @relation(fields: [user_id], references: [id])
+  task    Tasks[]
 }
 
-model Task {
-  id         Int      @id @default(autoincrement())
-  idUser     Int
-  idState    Int
-  idCategory Int
-  title      String
-  date       DateTime @db.Date
-  note       String
-  user       User     @relation(fields: [idUser], references: [id])
-  state      State    @relation(fields: [idState], references: [id])
-  category   Category @relation(fields: [idCategory], references: [id])
+model Tasks {
+  id          Int        @id @default(autoincrement())
+  user_id     Int
+  state_id    Int
+  category_id Int
+  title       String
+  date        DateTime   @db.Date
+  note        String
+  user        Users      @relation(fields: [user_id], references: [id])
+  state       States     @relation(fields: [state_id], references: [id])
+  category    Categories @relation(fields: [category_id], references: [id])
 }

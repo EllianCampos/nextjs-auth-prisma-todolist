@@ -17,16 +17,16 @@ const handler = NextAuth({
                 password: { label: "Contraseña", type: "password" }
             },
             async authorize(credentials, req) {
-                const resultVerify = await prisma.user.findUnique({ where: { email: credentials.email } })
-                if (!resultVerify) throw new Error('Invalid credentials')
+                const user = await prisma.users.findUnique({ where: { email: credentials.email } })
+                if (!user) throw new Error('Invalid credentials')
                 
-                const passwordMatch = await bcrypt.compare(credentials.password, resultVerify.password)
+                const passwordMatch = await bcrypt.compare(credentials.password, user.password)
                 if (!passwordMatch) throw new Error('Invalid credentials')
 
                 return {
-                    idUser: resultVerify.id,
-                    name: resultVerify.name,
-                    email: resultVerify.email
+                    id: user.id,
+                    name: user.name,
+                    email: user.email
                 }
             }
         })

@@ -27,21 +27,23 @@ export default function RegisterPage() {
       .then(response => {
         if (response.status === 201) {
           setError(null)
-          // router.push('/login')
           signIn('credentials', {
             email, password, redirect: false
           })
-          .then(authres => {
-            if (authres.ok) {
-              router.push('/')
-            }
-          })
-          
-        } 
-        return response.json()
+            .then(authres => {
+              if (authres.ok) {
+                router.push('/')
+              }
+            })
+        } else {
+          return response.json()
+        }
       })
       .then(response => {
-        setError(response.message)
+        if (response) {
+          setError(response.errorMessage)
+          console.log(error)
+        }
       })
   }
 
@@ -52,7 +54,7 @@ export default function RegisterPage() {
         <div className="row mb-1">
           {
             error !== null && (
-              <div className='alert alert-danger'>
+              <div className='alert alert-danger text-start'>
                 {error}
               </div>
             )
@@ -68,7 +70,6 @@ export default function RegisterPage() {
               name="name"
               id="name"
               className='form-control'
-              required
             />
           </div>
         </div>
@@ -82,7 +83,6 @@ export default function RegisterPage() {
               name="email"
               id="email"
               className='form-control'
-              required
             />
           </div>
         </div>
@@ -96,7 +96,6 @@ export default function RegisterPage() {
               name="password"
               id="password"
               className='form-control'
-              required
             />
           </div>
         </div>

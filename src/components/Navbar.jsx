@@ -2,18 +2,16 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { signOut } from 'next-auth/react' 
+import { signOut, useSession } from 'next-auth/react'
 
 export default function Navbar() {
 	const pathname = usePathname()
+	const { data: session } = useSession()
 
 	return (
 		<nav className="navbar nav-tabss navbar-expand-md navbar-dark bg-success">
 			<div className="container-fluid">
 				<Link className="navbar-brand" href={pathname === '/login' || pathname === '/register' ? '/login' : '/'}>Gestor de tareas</Link>
-				<button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-					<span className="navbar-toggler-icon"></span>
-				</button>
 				<div className="collapse navbar-collapse" id="navbarNav">
 					<ul className="navbar-nav">
 						{
@@ -43,6 +41,14 @@ export default function Navbar() {
 
 					</ul>
 				</div>
+				<div>
+					{session && session.user && session.user.email && pathname !== '/login' && pathname !== '/register' && (
+						<div className="d-nonex d-md-blockx">{session.user.email}</div>
+					)}
+				</div>
+				<button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+					<span className="navbar-toggler-icon"></span>
+				</button>
 			</div>
 		</nav>
 	)
