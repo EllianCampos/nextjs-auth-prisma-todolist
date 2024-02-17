@@ -59,6 +59,10 @@ export async function POST(request) {
                 {
                     user_id: newUser.id,
                     name: "Finalizado"
+                },
+                {
+                    user_id: newUser.id,
+                    name: 'Entregado'
                 }
             ]
         })
