@@ -18,7 +18,7 @@ export async function GET(req, { params }) {
         // Validate if the task exists and belongs to the user
         const state = await prisma.tasks.findUnique({
             where: {
-                id: Number(params.id),
+                id: params.id,
                 user_id: token.user.id,
             }
         })
@@ -27,7 +27,7 @@ export async function GET(req, { params }) {
         // Search
         const task = await prisma.tasks.findUnique({
             where: {
-                id: Number(params.id),
+                id: params.id,
                 user_id: token.user.id,
             },
             include: {
@@ -99,7 +99,7 @@ export async function PUT(req, { params }) {
     // Validate if the tasks exists and belongs to the user
     const task = await prisma.tasks.findUnique({
         where: {
-            id: Number(params.id),
+            id: params.id,
             user_id: token.user.id,
         }
     })
@@ -109,7 +109,7 @@ export async function PUT(req, { params }) {
     try {
         const taskUpdated = await prisma.tasks.update({
             where: {
-                id: Number(params.id),
+                id: params.id,
                 user_id: token.user.id
             },
             data: {
@@ -179,7 +179,7 @@ export async function DELETE(req, { params }) {
     // Validate if the tasks exists and belongs to the user
     const task = await prisma.tasks.findUnique({
         where: {
-            id: Number(params.id),
+            id: params.id,
             user_id: token.user.id,
         }
     })
@@ -189,7 +189,7 @@ export async function DELETE(req, { params }) {
         // Delete
         const taskDeleted = await prisma.tasks.delete({
             where: {
-                id: Number(params.id)
+                id: params.id
             }
         })
 

@@ -34,7 +34,7 @@ model Categories {
 }
 
 model Tasks {
-  id          Int        @id @default(autoincrement())
+  id          String     @id @default(uuid())
   user_id     Int
   state_id    Int
   category_id Int
