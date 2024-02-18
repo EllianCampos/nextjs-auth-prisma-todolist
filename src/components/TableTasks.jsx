@@ -19,7 +19,7 @@ export default function TableTasks ({ tasks }) {
               <td>{task.state.name}</td>
               <td>{task.category.name}</td>
               <td className="text-center">
-                <Link href={`/tasks/${task.id}`} className="btn btn-light ">
+                <Link href={`/tasks/${task.id}`} className="btn btn-primary ">
                   Seleccionar
                 </Link>
               </td>

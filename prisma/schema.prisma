@@ -2,23 +2,15 @@ generator client {
   provider = "prisma-client-js"
 }
 
-// MySQL
-// datasource db {
-//   provider = "mysql"
-//   url      = env("DATABASE_URL")
-// }
-
-// Postgress
 datasource db {
-  provider = "postgresql"
-  url = env("POSTGRES_PRISMA_URL") // uses connection pooling
-  directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
+  provider = "mysql"
+  url      = env("DATABASE_URL")
 }
 
 model Users {
-  id       Int        @id @default(autoincrement())
+  id       Int          @id @default(autoincrement())
   name     String
-  email    String     @unique
+  email    String       @unique
   password String
   state    States[]
   category Categories[]

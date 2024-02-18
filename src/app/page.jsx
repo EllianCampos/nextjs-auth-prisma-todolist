@@ -1,5 +1,6 @@
 'use client'
 
+import CustomButton from "@/components/CustomButton"
 import FilterButtons from "@/components/FilterButtons"
 import TableTasks from "@/components/TableTasks"
 import { useEffect, useState } from "react"
@@ -14,8 +15,8 @@ export default function Home() {
   const fetchTasks = () => {
     fetch('/api/tasks')
       .then(res => res.json())
-      .then(data => { 
-        setTasks(data) 
+      .then(data => {
+        setTasks(data)
         setAllTasks(data)
       })
   }
@@ -50,27 +51,24 @@ export default function Home() {
 
   return (
     <main className="container mt-3">
+      <div className="d-flex justify-content-end my-3" >
+        <CustomButton 
+          color={'outline-warning'} 
+          action={() => setTasks(allTasks)} 
+          text={'Mostrar todas las tareas'} 
+        />
+      </div>
       <div className="accordion" id="accordionPanelsStayOpenTasks">
         <div className="accordion-item">
           <h2 className="accordion-header" id="panelsStayOpen-headingOne">
             <button className="accordion-button bg-dark text-warning" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseOne">
-              Filtros por Estados
+              Filtros
             </button>
           </h2>
           <div id="panelsStayOpen-collapseOne" className="accordion-collapse collapse">
             <div className="accordion-body bg-black">
               <FilterButtons items={states} filter={filterByState} setTasks={setTasks} allTasks={allTasks} />
-            </div>
-          </div>
-        </div>
-        <div className="accordion-item">
-          <h2 className="accordion-header" id="panelsStayOpen-headingTwo">
-            <button className="accordion-button bg-dark text-warning" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseTwo">
-              Filtros por Categorías
-            </button>
-          </h2>
-          <div id="panelsStayOpen-collapseTwo" className="accordion-collapse collapse">
-            <div className="accordion-body bg-black">
+              <hr />
               <FilterButtons items={categories} filter={filterByCategory} setTasks={setTasks} allTasks={allTasks} />
             </div>
           </div>

@@ -18,6 +18,9 @@ export async function GET(req) {
       include: {
         state: true,
         category: true
+      },
+      orderBy: {
+        state_id: 'asc'
       }
     })
 

@@ -1,12 +1,6 @@
 export default function FilterButtons({ items, filter, setTasks, allTasks }) {
     return (
         <section>
-            <button 
-                className="btn btn-info"
-                onClick={() => setTasks(allTasks)}
-            >
-                Todas
-            </button>
             {items.map(item => (
                 <button 
                     key={Object.values(item)[0]} 
